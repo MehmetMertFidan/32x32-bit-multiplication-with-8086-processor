@@ -1,0 +1,53 @@
+mov [100h], 01234h   ; 32 bitlik carpani atadim.
+mov [102h], 05698h
+ 
+mov [104h], 09ABCh   ; 32 bitlik carpilani atadim.
+mov [106h], 0DE90h 
+     
+mov AX, [100h]   ;Carpan sayisini AX ve BX'e atadim.
+mov BX, [102h] 
+
+mov CX, [104h]   ;Carpilan sayisini CX ve DX'e atadim.
+mov DX, [106h]  
+            
+mov [10Eh], 0000h   ;Sonucun gelecegi bellek hucrelerini sifirladim. 
+mov [10Ch], 0000h
+mov [10Ah], 0000h
+mov [108h], 0000h  
+                                                   
+mov [110h], 32   ;Dongu degiskeni olarak 32'yi atadim.
+
+tekrar:
+mov [111h], AX      ;AX'e 111h'i atadim.
+and [111h], 0001h   ;Siradaki 2 satirda carpanin en dusuk degerlikli biti 1 mi diye bakiyoruz.
+xor [111h], 0001h     
+jz topla_kaydir     ;Eger 1 ise kod topla_kaydir'a dallaniyor.
+clc                 ;Carry flag, siradaki kodlarda sorun cikarmamasi icin sifirlaniyor. Cunku bir sonraki islem carry flag'den atkileniyor.
+     
+devam:
+rcr word ptr[10Eh], 1   ;Carpim sonucu 1 bit saga kaydiriliyor.
+rcr word ptr[10Ch], 1 
+rcr word ptr[10Ah], 1 
+rcr word ptr[108h], 1 
+
+shr BX,1   ;Siradaki 2 satirda carpan 1 bit saga kaydiriliyor. 
+rcr AX,1    
+     
+dec byte ptr[110h]      ;Dongu degikeni 1 azaliyor.         
+cmp byte ptr[110h], 0   ;Dongu degiskeni 0 mi diye bakiliyor.
+jnz tekrar              ;Eger 0 degil ise dongu devam ediyor.
+jmp son                 ;Eger 0 ise program bitiyor.
+
+
+topla_kaydir: 
+add [10Ch], CX   ;Sonucun ilgili kismina CX ekleniyor.
+adc [10Eh], DX   ;Sonucun diger ilgili kismina ise DX ekleniyor. 
+jmp devam        ;Ardindan dongudeki kalan isleri halletmek icin devam'a donuluyor.
+        
+son:
+
+;Program bitti buradan sonucu kontrol edebilirsiniz.        
+mov AX, [10Eh]    
+mov BX, [10Ch]
+mov CX, [10Ah]
+mov DX, [108h]    
